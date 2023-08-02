@@ -2,10 +2,8 @@
 
 OUT_DIR = target
 
-run: $(OUT_DIR)/a.out
-	./$(OUT_DIR)/a.out
+runClient: $(OUT_DIR)/a.out
 
-
-$(OUT_DIR)/a.out: lib/main.c
+$(OUT_DIR)/a.out: lib/client.c
 	mkdir -p $(OUT_DIR)
-	gcc lib/main.c -o $@
+	gcc lib/client.c -o $@
