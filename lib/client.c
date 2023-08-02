@@ -76,13 +76,13 @@ int getHostnameAndPath(char *hostname, char *path, char *url)
     }
     if (i == strlen(hostname_path))
     {
-        // NOTE: `/`がhostname_pathに含まれていなかった場合　hostname_path全体をhostname, pathを`/`とする
+        // NOTE: `/`がhostname_pathに含まれていなかった場合: hostname_path全体をhostname, pathを`/`とする
         strcpy(hostname, hostname_path);
         strcpy(path, "/");
     }
     else
     {
-        // NOTE `/`がhostname_pathに火組まれていた場合　`/`の直前でをhostname, `/`以降をpathとする
+        // NOTE `/`がhostname_pathに含まれていた場合: `/`の直前をhostname, `/`以降をpathとする
         strncpy(hostname, hostname_path, i);
         strcpy(path, &hostname_path[i]);
     }
@@ -140,7 +140,7 @@ int recvResponseMessage(int sock, char *request_message, unsigned int buffer_siz
             printf("Error: Failed to receive response");
             return -1;
         }
-        if (recv_size <= 0)
+        if (recv_size == 0)
         {
             printf("connection ended\n");
             break;
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
     ip_address = getIpAddress(hostname);
     if (ip_address == NULL)
     {
-        printf("Error: failed get IP Address\n");
+        printf("Error: failed get IP address\n");
         return -1;
     }
 
