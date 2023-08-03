@@ -7,14 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
-
-#define CONNECT_PORT 80
-#define MAX_RESPONSE_SIZE (1024 * 1024 * 5)
-#define MAX_REQUEST_SIZE (1024)
-#define MAX_HOSTNAME_SIZE 1024
-#define MAX_PATH_SIZE 1024
-#define MAX_SIZE 128
-#define MAX_URL 256
+#include "client.h"
 
 /**
  * ホスト名からIPアドレスを取得する
@@ -23,13 +16,21 @@
  */
 char *getIpAddress(char *hostname)
 {
+    printf("hostname: %s\n", hostname);
     struct hostent *host;
+
+    // NOTE: ホスト名がIPv4アドレスかチェック
+    if (inet_addr(hostname) != INADDR_NONE)
+    {
+        // NOTE: ホスト名が既にIPv4アドレスであれば、そのまま返す
+        return hostname;
+    }
 
     // NOTE: ホスト名からホスト情報を取得
     host = gethostbyname(hostname);
     if (host == NULL)
     {
-        printf("Error: Failed to get host infomation");
+        printf("Error: Failed to get host infomation\n");
         return NULL;
     }
 
@@ -56,7 +57,7 @@ int getHostnameAndPath(char *hostname, char *path, char *url)
     unsigned int i;
     char hostname_path[MAX_HOSTNAME_SIZE + MAX_PATH_SIZE];
 
-    // NOTE: URLの最初が `http://` の場合は `http://` を取り除く
+    // URLの最初が `http://` の場合は `http://` を取り除く
     if (strncmp(url, "http://", strlen("http://")) == 0)
     {
         sscanf(url, "http://%s", hostname_path);
@@ -69,21 +70,23 @@ int getHostnameAndPath(char *hostname, char *path, char *url)
     // NOTE: 最初の `/` までの文字数をカウント
     for (i = 0; i < strlen(hostname_path); i++)
     {
-        if (hostname_path[i] == "/")
+        if (hostname_path[i] == '/')
         {
             break;
         }
     }
+
+    // NOTE: `/` が hostname_path に含まれていなかった場合: hostname_path 全体を hostname, path を `/` とする
     if (i == strlen(hostname_path))
     {
-        // NOTE: `/`がhostname_pathに含まれていなかった場合: hostname_path全体をhostname, pathを`/`とする
         strcpy(hostname, hostname_path);
         strcpy(path, "/");
     }
     else
     {
-        // NOTE `/`がhostname_pathに含まれていた場合: `/`の直前をhostname, `/`以降をpathとする
+        // NOTE: `/` が hostname_path に含まれていた場合: `/` の直前を hostname, `/` 以降を path とする
         strncpy(hostname, hostname_path, i);
+        hostname[i] = '\0';
         strcpy(path, &hostname_path[i]);
     }
     return 0;
@@ -246,7 +249,6 @@ int main(int argc, char *argv[])
 {
     int sock = -1;
     struct sockaddr_in addr;
-    unsigned short port = CONNECT_PORT;
     char url[MAX_URL];
     char *ip_address;
     char hostname[MAX_HOSTNAME_SIZE];
@@ -258,7 +260,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("set url!!\n");
+        printf("Error: URL does not exist. Please set request URL\n");
         return -1;
     }
 
@@ -286,7 +288,7 @@ int main(int argc, char *argv[])
 
     // NOTE: 接続先の情報を設定
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
+    addr.sin_port = htons(CONNECT_PORT);
 
     // NOTE: ip_addressは数値の配列なのでそのままコピー (inet_addrは不要)
     memcpy(&(addr.sin_addr.s_addr), ip_address, 4);
