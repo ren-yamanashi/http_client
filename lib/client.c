@@ -15,6 +15,14 @@
 #include "response.h"
 #include "client.h"
 
+void createRequest(HttpRequest *request, char *method, char *target, char *endpoint)
+{
+    copyStringSafely(request->method, method, sizeof(request->method));
+    copyStringSafely(request->target, target, sizeof(request->target));
+    copyStringSafely(request->endpoint, endpoint, sizeof(request->endpoint));
+    copyStringSafely(request->version, HTTP_VERSION, sizeof(request->version));
+}
+
 /**
  * HTTP通信でサーバーとデータのやり取りを行う
  * @param sock サーバーと接続積みのソケット
@@ -40,15 +48,14 @@ int connection(int sock, Host *host, HttpRequest *request)
     return 0;
 }
 
-int httpRequestWithConnection(char *url)
+int httpRequestWithConnection(HttpRequest *request)
 {
     int sock = ERROR_FLAG;
     struct sockaddr_in sock_addr_info;
     Host host;
-    HttpRequest request;
 
     // NOTE: urlからホスト名・パス・ポート番号・IPアドレスを取得
-    parseURL(&host, &request, url);
+    parseURL(&host, request);
     if (host.ip_address == NULL)
     {
         printf("Error: Failed get IP address\n");
@@ -77,7 +84,7 @@ int httpRequestWithConnection(char *url)
     }
 
     // NOTE: HTTP通信でデータのやり取り
-    connection(sock, &host, &request);
+    connection(sock, &host, request);
 
     // NOTE: ソケット通信をクローズ
     if (isError(close(sock)))

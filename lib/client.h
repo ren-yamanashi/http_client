@@ -8,6 +8,7 @@ void showMessage(char *message, unsigned int size);
 int recvResponseMessage(int sock, char *response_message, unsigned int buffer_size);
 int saveBody(const char *file_path, char *response_message, unsigned int response_size);
 int connection(int sock, Host *host, HttpRequest *request);
-int httpRequestWithConnection(char *url);
+int httpRequestWithConnection(HttpRequest *request);
+void createRequest(HttpRequest *request, char *method, char *target, char *endpoint);
 
 #endif
