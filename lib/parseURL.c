@@ -17,7 +17,6 @@
  */
 char *getIpAddress(char *hostname)
 {
-    printf("hostname: %s\n", hostname);
     struct hostent *host;
 
     // NOTE: ホスト名がIPv4アドレスかチェック
