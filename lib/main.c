@@ -9,6 +9,6 @@
 int main()
 {
     HttpRequest request;
-    createRequest(&request, "GET", "/user/23", "http://localhost:8080");
+    createRequest(&request, HTTP_METHOD_GET, "/user/23", "http://localhost:8080");
     httpRequestWithConnection(&request);
 }
