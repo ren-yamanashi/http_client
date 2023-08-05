@@ -2,8 +2,9 @@
 #define _PARSE_URL_H
 
 #include "constance.h"
+#include "struct.h"
 
-char *getIpAddress(char *hostname);
-int getHostnameAndPathAndPort(char *hostname, int *port, char *path, char *url);
-
+char *getIpAddress(char *hostname); 
+int getHostnameAndPath(Host *host, char *path, char *url);
+void getPortNumber(Host *host);
 #endif

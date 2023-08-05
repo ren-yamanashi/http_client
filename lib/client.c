@@ -11,6 +11,7 @@
 #include "parseURL.h"
 #include "request.h"
 #include "helper.h"
+#include "struct.h"
 #include "client.h"
 
 /**
@@ -107,12 +108,11 @@ int httpClient(int sock, char *hostname, char *path)
 int main(int argc, char *argv[])
 {
     int sock = -1;
-    int port;
     struct sockaddr_in sock_addr_info;
     char url[MAX_URL];
     char *ip_address;
-    char hostname[MAX_HOSTNAME_SIZE];
     char path[MAX_PATH_SIZE];
+    Host host;
 
     if (argc == 2)
     {
@@ -125,10 +125,11 @@ int main(int argc, char *argv[])
     }
 
     // NOTE: urlからホスト名・パス・ポート番号を取得
-    getHostnameAndPathAndPort(hostname, &port, path, url);
+    getHostnameAndPath(&host, path, url);
+    getPortNumber(&host);
 
     // NOTE: ホスト名からIPアドレスを取得
-    ip_address = getIpAddress(hostname);
+    ip_address = getIpAddress(host.hostname);
     if (ip_address == NULL)
     {
         printf("Error: failed get IP address\n");
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
 
     // NOTE:サーバーのアドレスファミリー・ボート番号・IPアドレスの情報を設定
     sock_addr_info.sin_family = AF_INET;
-    sock_addr_info.sin_port = htons((unsigned short)port);
+    sock_addr_info.sin_port = htons((unsigned short)host.port);
     memcpy(&(sock_addr_info.sin_addr.s_addr), ip_address, 4);
 
     // NOTE: サーバーに接続
@@ -160,7 +161,7 @@ int main(int argc, char *argv[])
     }
 
     // NOTE: HTTP通信でデータのやり取り
-    httpClient(sock, hostname, path);
+    httpClient(sock, host.hostname, path);
 
     // NOTE: ソケット通信をクローズ
     if (isError(close(sock)))
