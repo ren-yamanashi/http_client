@@ -21,12 +21,12 @@
  */
 int createRequestMessage(char *request_message, Host *host, HttpRequest *request)
 {
-    char _request[MAX_SIZE];
+    char request_line[MAX_SIZE];
     char header[MAX_SIZE];
 
-    sprintf(_request, "GET %s HTTP/1.1", request->target);
+    sprintf(request_line, "%s %s %s", request->method, request->target, request->version);
     sprintf(header, "Host: %s\r\nConnection: close", host->hostname);
-    sprintf(request_message, "%s\r\n%s\r\n\r\n", _request, header);
+    sprintf(request_message, "%s\r\n%s\r\n\r\n", request_line, header);
 
     return strlen(request_message);
 }

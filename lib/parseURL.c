@@ -57,19 +57,19 @@ int *getIpAddress(Host *host)
  * @param URL
  * @return 0
  */
-int getHostnameAndPath(Host *host, HttpRequest *request, char *url)
+int getHostnameAndPath(Host *host, HttpRequest *request)
 {
     unsigned int i, j;
     char hostname_path[MAX_HOSTNAME_SIZE + MAX_PATH_SIZE];
 
     // URLの最初が `http://` の場合は `http://` を取り除く
-    if (strncmp(url, "http://", strlen("http://")) == 0)
+    if (strncmp(request->endpoint, "http://", strlen("http://")) == 0)
     {
-        sscanf(url, "http://%s", hostname_path);
+        sscanf(request->endpoint, "http://%s", hostname_path);
     }
     else
     {
-        strcpy(hostname_path, url);
+        strcpy(hostname_path, request->endpoint);
     }
 
     // NOTE: 最初の `/` までの文字数をカウント
@@ -80,17 +80,15 @@ int getHostnameAndPath(Host *host, HttpRequest *request, char *url)
             break;
         }
     }
-    // NOTE: `/` が hostname_path に含まれていなかった場合: hostname_path 全体を hostname, path を `/` とする
+    // NOTE: `/` が hostname_path に含まれていなかった場合: hostname_path 全体を hostname とする
     if (i == strlen(hostname_path))
     {
         copyStringSafely(host->hostname, hostname_path, sizeof(host->hostname));
-        strcpy(request->target, (const char *)'/');
     }
     else
     {
-        // NOTE: `/` が hostname_path に含まれていた場合: `/` の直前を hostname, `/` 以降を path とする
+        // NOTE: `/` が hostname_path に含まれていた場合: `/` の直前を hostname とする
         copyStringSafely(host->hostname, hostname_path, i + 1);
-        strcpy(request->target, &hostname_path[i]);
     }
     return 0;
 }
@@ -125,9 +123,9 @@ void getPortNumber(Host *host)
     }
 }
 
-void parseURL(Host *host, HttpRequest *request, char *url)
+void parseURL(Host *host, HttpRequest *request)
 {
-    getHostnameAndPath(host, request, url);
+    getHostnameAndPath(host, request);
     getPortNumber(host);
     getIpAddress(host);
 }

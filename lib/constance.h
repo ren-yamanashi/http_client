@@ -11,5 +11,6 @@
 #define MAX_URL 256
 #define ERROR_FLAG -1
 #define SUCCESS_FLAG 1
+#define HTTP_VERSION "HTTP/1.1"
 
 #endif

@@ -6,18 +6,9 @@
 #include "constance.h"
 #include "client.h"
 
-int main(int argc, char *argv[])
+int main()
 {
-    char url[MAX_URL];
-    if (argc == 2)
-    {
-        strcpy(url, argv[1]);
-    }
-    else
-    {
-        printf("Error: URL does not exist. Please set request URL\n");
-        return ERROR_FLAG;
-    }
-
-    httpRequestWithConnection(url);
+    HttpRequest request;
+    createRequest(&request, "GET", "/user/23", "http://localhost:8080");
+    httpRequestWithConnection(&request);
 }
