@@ -1,9 +1,23 @@
-.PHONY: run
+.PHONY: buildClient
 
+CC = gcc
 OUT_DIR = target
+OUT_FILE = a.out
+SOURCES = lib/client.c lib/parseURL.c
 
-runClient: $(OUT_DIR)/a.out
+default:
+	make clean 
+	make buildClient
+	make runClient
 
-$(OUT_DIR)/a.out: lib/client.c
+buildClient: $(OUT_DIR)/$(OUT_FILE)
+
+$(OUT_DIR)/$(OUT_FILE): $(SOURCES)
 	mkdir -p $(OUT_DIR)
-	gcc lib/client.c -o $@
+	$(CC) $(SOURCES) -o $(OUT_DIR)/$(OUT_FILE)
+
+clean:
+	rm -rf $(OUT_DIR)
+
+runClient: 
+	target/a.out http://localhost:8080/
