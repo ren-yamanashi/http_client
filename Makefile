@@ -20,4 +20,4 @@ clean:
 	rm -rf $(OUT_DIR)
 
 runClient: 
-	target/a.out http://localhost:8080/user/2
+	target/a.out

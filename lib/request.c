@@ -25,7 +25,7 @@ int createRequestMessage(char *request_message, Host *host, HttpRequest *request
     char header[MAX_SIZE];
 
     sprintf(request_line, "%s %s %s", request->method, request->target, request->version);
-    if (strlen(request->content_type - 1) > 0)
+    if (request->content_length > 0)
     {
         sprintf(header, "Host: %s\r\nConnection: close\r\nContent-Type: %s\r\nContent-Length: %d",
                 host->hostname,

@@ -9,6 +9,12 @@ int recvResponseMessage(int sock, char *response_message, unsigned int buffer_si
 int saveBody(const char *file_path, char *response_message, unsigned int response_size);
 int connection(int sock, Host *host, HttpRequest *request);
 int httpRequestWithConnection(HttpRequest *request);
-void createRequest(HttpRequest *request, char *method, char *target, char *endpoint);
+void createRequest(
+    HttpRequest *request,
+    char *method,
+    char *target,
+    char *endpoint,
+    char *body,
+    char *content_type);
 
 #endif
