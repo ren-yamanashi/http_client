@@ -12,5 +12,6 @@
 #define ERROR_FLAG -1
 #define SUCCESS_FLAG 1
 #define HTTP_VERSION "HTTP/1.1"
-
+#define HTTP_METHOD_GET "GET"
+#define HTTP_METHOD_POST "POST"
 #endif
