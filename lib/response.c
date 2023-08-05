@@ -14,7 +14,7 @@
 /**
  * レスポンスメッセージの受信
  * @param sock 接続済みのソケット
- * @param response_size レスポンスメッセージを格納するバッファのアドレス
+ * @param response_message レスポンスメッセージを格納するバッファのアドレス
  * @param buffer_size response_messageのバッファのサイズ
  * @return 受信したデータサイズ(バイト長)
  */

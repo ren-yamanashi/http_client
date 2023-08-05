@@ -22,7 +22,7 @@
  * @param path パスが格納されたバッファへのアドレス
  * @return 成功時 0 失敗時 -1
  */
-int httpClient(int sock, Host *host, HttpRequest *request)
+int connection(int sock, Host *host, HttpRequest *request)
 {
     // NOTE: リクエストを処理
     if (isError(processRequest(sock, host, request)))
@@ -30,7 +30,6 @@ int httpClient(int sock, Host *host, HttpRequest *request)
         printf("Error: Failed send request");
         return ERROR_FLAG;
     }
-
     // NOTE: レスポンスメッセージを処理
     if (isError(processResponse(sock)))
     {
@@ -49,13 +48,10 @@ int httpRequestWithConnection(char *url)
     HttpRequest request;
 
     // NOTE: urlからホスト名・パス・ポート番号・IPアドレスを取得
-    getHostnameAndPath(&host, &request, url);
-    getPortNumber(&host);
-    getIpAddress(&host);
-
+    parseURL(&host, &request, url);
     if (host.ip_address == NULL)
     {
-        printf("Error: failed get IP address\n");
+        printf("Error: Failed get IP address\n");
         return ERROR_FLAG;
     }
 
@@ -63,14 +59,12 @@ int httpRequestWithConnection(char *url)
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (isError(sock))
     {
-        printf("socket error\n");
+        printf("Error: Failed create socket\n");
         return ERROR_FLAG;
     }
 
-    // NOTE: 構造体を全て0にセット
-    memset(&sock_addr_info, 0, sizeof(struct sockaddr_in));
-
     // NOTE:サーバーのアドレスファミリー・ボート番号・IPアドレスの情報を設定
+    memset(&sock_addr_info, 0, sizeof(struct sockaddr_in));
     sock_addr_info.sin_family = AF_INET;
     sock_addr_info.sin_port = htons((unsigned short)host.port);
     memcpy(&(sock_addr_info.sin_addr.s_addr), host.ip_address, 4);
@@ -78,13 +72,12 @@ int httpRequestWithConnection(char *url)
     // NOTE: サーバーに接続
     if (isError(connect(sock, (struct sockaddr *)&sock_addr_info, sizeof(struct sockaddr_in))))
     {
-        printf("Error: failed connect server\n");
         close(sock);
         return ERROR_FLAG;
     }
 
     // NOTE: HTTP通信でデータのやり取り
-    httpClient(sock, &host, &request);
+    connection(sock, &host, &request);
 
     // NOTE: ソケット通信をクローズ
     if (isError(close(sock)))

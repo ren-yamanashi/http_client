@@ -7,4 +7,6 @@
 int *getIpAddress(Host *host);
 int getHostnameAndPath(Host *host, HttpRequest *request, char *url);
 void getPortNumber(Host *host);
+void parseURL(Host *host, HttpRequest *request, char *url);
+
 #endif

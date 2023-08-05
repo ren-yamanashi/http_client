@@ -53,8 +53,8 @@ int *getIpAddress(Host *host)
 /**
  * URLからホスト名とパスを取得する
  * @param host ホスト情報が格納された構造体
- * @param path パスを格納するバッファへのアドレス
- * @param URLが格納するバッファへのアドレス
+ * @param request リクエスト情報が格納された構造体
+ * @param URL
  * @return 0
  */
 int getHostnameAndPath(Host *host, HttpRequest *request, char *url)
@@ -84,7 +84,7 @@ int getHostnameAndPath(Host *host, HttpRequest *request, char *url)
     if (i == strlen(hostname_path))
     {
         copyStringSafely(host->hostname, hostname_path, sizeof(host->hostname));
-        strcpy(request->target, (const char*)'/');
+        strcpy(request->target, (const char *)'/');
     }
     else
     {
@@ -123,4 +123,11 @@ void getPortNumber(Host *host)
     {
         host->port = DEFAULT_PORT;
     }
+}
+
+void parseURL(Host *host, HttpRequest *request, char *url)
+{
+    getHostnameAndPath(host, request, url);
+    getPortNumber(host);
+    getIpAddress(host);
 }

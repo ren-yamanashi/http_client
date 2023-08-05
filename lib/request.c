@@ -15,8 +15,8 @@
 /**
  * リクエストメッセージを作成
  * @param request_message リクエストメッセージを格納するバッファへのアドレス
- * @param target リクエストターゲット(リクエストするファイル)
- * @param host リクエスト先のホスト名
+ * @param host ホスト情報が格納された構造体
+ * @param request リクエスト情報が格納された構造体
  * @return メッセージのサイズ
  */
 int createRequestMessage(char *request_message, Host *host, HttpRequest *request)
