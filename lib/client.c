@@ -7,9 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
-#include "client.h"
 #include "constance.h"
 #include "parseURL.h"
+#include "client.h"
 
 /**
  * リクエストメッセージを作成
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 {
     int sock = -1;
     int port;
-    struct sockaddr_in addr;
+    struct sockaddr_in sock_addr_info;
     char url[MAX_URL];
     char *ip_address;
     char hostname[MAX_HOSTNAME_SIZE];
@@ -208,14 +208,13 @@ int main(int argc, char *argv[])
     }
 
     // NOTE: 構造体を全て０にセット
-    memset(&addr, 0, sizeof(struct sockaddr_in));
+    memset(&sock_addr_info, 0, sizeof(struct sockaddr_in));
 
     // NOTE: 接続先の情報を設定
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(DEFAULT_PORT);
-
+    sock_addr_info.sin_family = AF_INET;
+    sock_addr_info.sin_port = htons(port);
     // NOTE: ip_addressは数値の配列なのでそのままコピー (inet_addrは不要)
-    memcpy(&(addr.sin_addr.s_addr), ip_address, 4);
+    memcpy(&(sock_addr_info.sin_addr.s_addr), ip_address, 4);
 
     // NOTE: サーバーに接続
     printf("Connect to %u.%u.%u.%u\n",
@@ -224,7 +223,7 @@ int main(int argc, char *argv[])
            (unsigned char)ip_address[2],
            (unsigned char)ip_address[3]);
 
-    if (connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+    if (connect(sock, (struct sockaddr *)&sock_addr_info, sizeof(struct sockaddr_in)) == -1)
     {
         printf("Error: failed connect server\n");
         close(sock);
