@@ -24,34 +24,19 @@
  */
 int httpClient(int sock, Host *host, HttpRequest *request)
 {
-    int request_size, response_size;
-    char request_message[MAX_REQUEST_SIZE];
-    char response_message[MAX_RESPONSE_SIZE];
-
+    // NOTE: リクエストを処理
     if (isError(processRequest(sock, host, request)))
     {
         printf("Error: Failed send request");
-    }
-
-    // NOTE: レスポンスメッセージを受信
-    response_size = recvResponseMessage(sock, response_message, MAX_RESPONSE_SIZE);
-    if (isError(response_size))
-    {
-        printf("Error: failed recv response message\n");
-        return ERROR_FLAG;
-    }
-    if (response_size == 0)
-    {
-        // NOTE: 受信サイズが0の場合は相手が接続を閉じていると判断
-        printf("Info: Connection ended\n");
         return ERROR_FLAG;
     }
 
-    // NOTE: レスポンスメッセージの表示
-    printf("\n======Response message======\n\n");
-    showMessage(response_message, response_size);
-
-    // TODO: レスポンスメッセージに応じた処理
+    // NOTE: レスポンスメッセージを処理
+    if (isError(processResponse(sock)))
+    {
+        printf("Error: Failed recv response");
+        return ERROR_FLAG;
+    }
 
     return 0;
 }
@@ -63,12 +48,11 @@ int httpRequestWithConnection(char *url)
     Host host;
     HttpRequest request;
 
-    // NOTE: urlからホスト名・パス・ポート番号を取得
+    // NOTE: urlからホスト名・パス・ポート番号・IPアドレスを取得
     getHostnameAndPath(&host, &request, url);
     getPortNumber(&host);
-
-    // NOTE: ホスト名からIPアドレスを取得
     getIpAddress(&host);
+
     if (host.ip_address == NULL)
     {
         printf("Error: failed get IP address\n");

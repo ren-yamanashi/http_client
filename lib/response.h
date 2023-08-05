@@ -2,5 +2,5 @@
 #define _RESPONSE_H
 
 int recvResponseMessage(int sock, char *response_message, unsigned int buffer_size);
-
+int processResponse(int sock);
 #endif
