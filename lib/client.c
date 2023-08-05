@@ -8,89 +8,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include "client.h"
-
-/**
- * ホスト名からIPアドレスを取得する
- * @param hostname ホスト名
- * @return IPアドレスが格納されたバッファへのアドレス(失敗時はNULL)
- */
-char *getIpAddress(char *hostname)
-{
-    printf("hostname: %s\n", hostname);
-    struct hostent *host;
-
-    // NOTE: ホスト名がIPv4アドレスかチェック
-    if (inet_addr(hostname) != INADDR_NONE)
-    {
-        // NOTE: ホスト名が既にIPv4アドレスであれば、そのまま返す
-        return hostname;
-    }
-
-    // NOTE: ホスト名からホスト情報を取得
-    host = gethostbyname(hostname);
-    if (host == NULL)
-    {
-        printf("Error: Failed to get host infomation\n");
-        return NULL;
-    }
-
-    // NOTE: IPv4以外はエラー
-    if (host->h_length != 4)
-    {
-        printf("Error: Internet protocol is not IPv4");
-        return NULL;
-    }
-
-    // NOTE: ホスト情報のアドレス群の一つ目をIPアドレスとする
-    return host->h_addr_list[0];
-}
-
-/**
- * URLからホスト名とパスを取得する
- * @param hostname ホスト名と格納するバッファへのアドレス
- * @param path パスを格納するバッファへのアドレス
- * @param URLが格納するバッファへのアドレス
- * @return 0
- */
-int getHostnameAndPath(char *hostname, char *path, char *url)
-{
-    unsigned int i;
-    char hostname_path[MAX_HOSTNAME_SIZE + MAX_PATH_SIZE];
-
-    // URLの最初が `http://` の場合は `http://` を取り除く
-    if (strncmp(url, "http://", strlen("http://")) == 0)
-    {
-        sscanf(url, "http://%s", hostname_path);
-    }
-    else
-    {
-        strcpy(hostname_path, url);
-    }
-
-    // NOTE: 最初の `/` までの文字数をカウント
-    for (i = 0; i < strlen(hostname_path); i++)
-    {
-        if (hostname_path[i] == '/')
-        {
-            break;
-        }
-    }
-
-    // NOTE: `/` が hostname_path に含まれていなかった場合: hostname_path 全体を hostname, path を `/` とする
-    if (i == strlen(hostname_path))
-    {
-        strcpy(hostname, hostname_path);
-        strcpy(path, "/");
-    }
-    else
-    {
-        // NOTE: `/` が hostname_path に含まれていた場合: `/` の直前を hostname, `/` 以降を path とする
-        strncpy(hostname, hostname_path, i);
-        hostname[i] = '\0';
-        strcpy(path, &hostname_path[i]);
-    }
-    return 0;
-}
+#include "constance.h"
+#include "parseURL.h"
 
 /**
  * リクエストメッセージを作成
@@ -215,7 +134,7 @@ int httpClient(int sock, char *hostname, char *path)
 
     // NOTE: リクエストメッセージを作成
     request_size = createRequestMessage(request_message, path, hostname);
-    if (request_message == -1)
+    if (request_size == -1)
     {
         printf("Error: failed create request message\n");
         return -1;
@@ -248,6 +167,7 @@ int httpClient(int sock, char *hostname, char *path)
 int main(int argc, char *argv[])
 {
     int sock = -1;
+    int port;
     struct sockaddr_in addr;
     char url[MAX_URL];
     char *ip_address;
@@ -265,7 +185,11 @@ int main(int argc, char *argv[])
     }
 
     // NOTE: ホスト名とパスを取得
-    getHostnameAndPath(hostname, path, url);
+    getHostnameAndPathAndPort(hostname, &port, path, url);
+    printf("hostname: %s\n", hostname);
+    printf("port: %d\n", port);
+    printf("path: %s\n", path);
+    printf("url: %s\n", url);
 
     // NOTE: IPアドレスを取得
     ip_address = getIpAddress(hostname);
@@ -288,7 +212,7 @@ int main(int argc, char *argv[])
 
     // NOTE: 接続先の情報を設定
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(CONNECT_PORT);
+    addr.sin_port = htons(DEFAULT_PORT);
 
     // NOTE: ip_addressは数値の配列なのでそのままコピー (inet_addrは不要)
     memcpy(&(addr.sin_addr.s_addr), ip_address, 4);

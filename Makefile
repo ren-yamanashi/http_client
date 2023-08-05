@@ -1,9 +1,17 @@
-.PHONY: run
+.PHONY: runClient
 
+CC = gcc
 OUT_DIR = target
+OUT_FILE = a.out
+SOURCES = lib/client.c lib/parseURL.c
 
-runClient: $(OUT_DIR)/a.out
+default: runClient
 
-$(OUT_DIR)/a.out: lib/client.c
+runClient: $(OUT_DIR)/$(OUT_FILE)
+
+$(OUT_DIR)/$(OUT_FILE): $(SOURCES)
 	mkdir -p $(OUT_DIR)
-	gcc lib/client.c -o $@
+	$(CC) $(SOURCES) -o $(OUT_DIR)/$(OUT_FILE)
+
+clean:
+	rm -rf $(OUT_DIR)
