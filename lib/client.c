@@ -15,12 +15,27 @@
 #include "response.h"
 #include "client.h"
 
-void createRequest(HttpRequest *request, char *method, char *target, char *endpoint)
+void createRequest(
+    HttpRequest *request,
+    char *method,
+    char *target,
+    char *endpoint,
+    char *body,
+    char *content_type)
 {
     copyStringSafely(request->method, method, sizeof(request->method));
     copyStringSafely(request->target, target, sizeof(request->target));
     copyStringSafely(request->endpoint, endpoint, sizeof(request->endpoint));
     copyStringSafely(request->version, HTTP_VERSION, sizeof(request->version));
+    if (body != NULL && strlen(body) - 1 > 0)
+    {
+        copyStringSafely(request->body, body, sizeof(request->body));
+        request->content_length = strlen(request->body) - 1;
+    }
+    if (content_type != NULL && strlen(content_type) - 1 > 0)
+    {
+        copyStringSafely(request->content_type, content_type, sizeof(request->content_type));
+    }
 }
 
 /**
@@ -44,7 +59,6 @@ int connection(int sock, Host *host, HttpRequest *request)
         printf("Error: Failed recv response");
         return ERROR_FLAG;
     }
-
     return 0;
 }
 
