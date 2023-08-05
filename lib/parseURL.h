@@ -5,6 +5,6 @@
 #include "struct.h"
 
 int *getIpAddress(Host *host);
-int getHostnameAndPath(Host *host, char *path, char *url);
+int getHostnameAndPath(Host *host, HttpRequest *request, char *url);
 void getPortNumber(Host *host);
 #endif

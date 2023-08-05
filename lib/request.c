@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include "constance.h"
+#include "helper.h"
+#include "struct.h"
 #include "request.h"
 
 /**
@@ -17,14 +19,14 @@
  * @param host リクエスト先のホスト名
  * @return メッセージのサイズ
  */
-int createRequestMessage(char *request_message, char *path, char *hostname)
+int createRequestMessage(char *request_message, Host *host, HttpRequest *request)
 {
-    char request[MAX_SIZE];
+    char _request[MAX_SIZE];
     char header[MAX_SIZE];
 
-    sprintf(request, "GET %s HTTP/1.1", path);
-    sprintf(header, "Host: %s\r\nConnection: close", hostname);
-    sprintf(request_message, "%s\r\n%s\r\n\r\n", request, header);
+    sprintf(_request, "GET %s HTTP/1.1", request->target);
+    sprintf(header, "Host: %s\r\nConnection: close", host->hostname);
+    sprintf(request_message, "%s\r\n%s\r\n\r\n", _request, header);
 
     return strlen(request_message);
 }
@@ -40,4 +42,29 @@ int sendRequestMessage(int sock, char *request_message, unsigned int message_siz
 {
     int send_size = send(sock, request_message, message_size, 0);
     return send_size;
+}
+
+int processRequest(int sock, Host *host, HttpRequest *request)
+{
+    int request_size;
+    char request_message[MAX_REQUEST_SIZE];
+    // TODO: リクエストメッセージの解析
+
+    // NOTE: リクエストメッセージを作成
+    request_size = createRequestMessage(request_message, host, request);
+    if (isError(request_size))
+    {
+        return ERROR_FLAG;
+    }
+
+    // NOTE: リクエストメッセージの表示
+    printf("\n======Request message======\n\n");
+    showMessage(request_message, request_size);
+
+    // NOTE: リクエストメッセージを送信
+    if (isError(sendRequestMessage(sock, request_message, request_size)))
+    {
+        return ERROR_FLAG;
+    }
+    return SUCCESS_FLAG;
 }

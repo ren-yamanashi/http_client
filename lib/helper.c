@@ -27,3 +27,18 @@ int isMatchStr(const char *str1, const char *str2)
     }
     return 0;
 }
+
+/**
+ * 受信した文字列を表示
+ * @param message メッセージを格納するバッファへのアドレス
+ * @param size メッセージのバイト数
+ */
+void showMessage(char *message, unsigned int size)
+{
+    unsigned int i;
+    for (i = 0; i < size; i++)
+    {
+        putchar(message[i]);
+    }
+    printf("\r\n");
+}

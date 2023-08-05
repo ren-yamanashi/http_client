@@ -6,5 +6,6 @@
 void copyStringSafely(char *destination, char *source, size_t destination_size);
 int isError(int target);
 int isMatchStr(const char *str1, const char *str2);
+void showMessage(char *message, unsigned int size);
 
 #endif

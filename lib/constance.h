@@ -10,5 +10,6 @@
 #define MAX_SIZE 128
 #define MAX_URL 256
 #define ERROR_FLAG -1
+#define SUCCESS_FLAG 1
 
 #endif

@@ -57,7 +57,7 @@ int *getIpAddress(Host *host)
  * @param URLが格納するバッファへのアドレス
  * @return 0
  */
-int getHostnameAndPath(Host *host, char *path, char *url)
+int getHostnameAndPath(Host *host, HttpRequest *request, char *url)
 {
     unsigned int i, j;
     char hostname_path[MAX_HOSTNAME_SIZE + MAX_PATH_SIZE];
@@ -84,13 +84,13 @@ int getHostnameAndPath(Host *host, char *path, char *url)
     if (i == strlen(hostname_path))
     {
         copyStringSafely(host->hostname, hostname_path, sizeof(host->hostname));
-        strcpy(path, '/');
+        strcpy(request->target, (const char*)'/');
     }
     else
     {
         // NOTE: `/` が hostname_path に含まれていた場合: `/` の直前を hostname, `/` 以降を path とする
         copyStringSafely(host->hostname, hostname_path, i + 1);
-        strcpy(path, &hostname_path[i]);
+        strcpy(request->target, &hostname_path[i]);
     }
     return 0;
 }

@@ -16,50 +16,21 @@
 #include "client.h"
 
 /**
- * 受信した文字列を表示
- * @param message メッセージを格納するバッファへのアドレス
- * @param size メッセージのバイト数
- */
-void showMessage(char *message, unsigned int size)
-{
-    unsigned int i;
-    for (i = 0; i < size; i++)
-    {
-        putchar(message[i]);
-    }
-    printf("\r\n");
-}
-
-/**
  * HTTP通信でサーバーとデータのやり取りを行う
  * @param sock サーバーと接続積みのソケット
  * @param hostname ホスト名が格納されたバッファへのアドレス
  * @param path パスが格納されたバッファへのアドレス
  * @return 成功時 0 失敗時 -1
  */
-int httpClient(int sock, char *hostname, char *path)
+int httpClient(int sock, Host *host, HttpRequest *request)
 {
     int request_size, response_size;
     char request_message[MAX_REQUEST_SIZE];
     char response_message[MAX_RESPONSE_SIZE];
 
-    // NOTE: リクエストメッセージを作成
-    request_size = createRequestMessage(request_message, path, hostname);
-    if (isError(request_size))
+    if (isError(processRequest(sock, host, request)))
     {
-        printf("Error: failed create request message\n");
-        return ERROR_FLAG;
-    }
-
-    // NOTE: リクエストメッセージの表示
-    printf("\n======Request message======\n\n");
-    showMessage(request_message, request_size);
-
-    // NOTE: リクエストメッセージを送信
-    if (isError(sendRequestMessage(sock, request_message, request_size)))
-    {
-        printf("Error: failed send request message\n");
-        return ERROR_FLAG;
+        printf("Error: Failed send request");
     }
 
     // NOTE: レスポンスメッセージを受信
@@ -85,26 +56,15 @@ int httpClient(int sock, char *hostname, char *path)
     return 0;
 }
 
-int main(int argc, char *argv[])
+int httpRequestWithConnection(char *url)
 {
     int sock = ERROR_FLAG;
-    char url[MAX_URL];
-    char path[MAX_PATH_SIZE];
     struct sockaddr_in sock_addr_info;
     Host host;
-
-    if (argc == 2)
-    {
-        strcpy(url, argv[1]);
-    }
-    else
-    {
-        printf("Error: URL does not exist. Please set request URL\n");
-        return ERROR_FLAG;
-    }
+    HttpRequest request;
 
     // NOTE: urlからホスト名・パス・ポート番号を取得
-    getHostnameAndPath(&host, path, url);
+    getHostnameAndPath(&host, &request, url);
     getPortNumber(&host);
 
     // NOTE: ホスト名からIPアドレスを取得
@@ -140,7 +100,7 @@ int main(int argc, char *argv[])
     }
 
     // NOTE: HTTP通信でデータのやり取り
-    httpClient(sock, host.hostname, path);
+    httpClient(sock, &host, &request);
 
     // NOTE: ソケット通信をクローズ
     if (isError(close(sock)))
