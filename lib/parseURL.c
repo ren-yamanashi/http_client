@@ -8,52 +8,56 @@
 #include <unistd.h>
 #include <netdb.h>
 #include "constance.h"
+#include "helper.h"
 #include "parseURL.h"
 
 /**
  * ホスト名からIPアドレスを取得する
- * @param hostname ホスト名
- * @return IPアドレスが格納されたバッファへのアドレス(失敗時はNULL)
+ * @param host ホスト情報が格納された構造体
+ * @return 0
  */
-char *getIpAddress(char *hostname)
+int *getIpAddress(Host *host)
 {
-    printf("hostname: %s\n", hostname);
-    struct hostent *host;
+    struct hostent *host_info;
 
     // NOTE: ホスト名がIPv4アドレスかチェック
-    if (inet_addr(hostname) != INADDR_NONE)
+    if (inet_addr(host->hostname) != INADDR_NONE)
     {
-        // NOTE: ホスト名が既にIPv4アドレスであれば、そのまま返す
-        return hostname;
+        // NOTE: ホスト名が既にIPv4アドレスであれば、ホスト名をIPアドレスとする
+        host->ip_address = host->hostname;
+        return 0;
     }
 
     // NOTE: ホスト名からホスト情報を取得
-    host = gethostbyname(hostname);
-    if (host == NULL)
+    host_info = gethostbyname(host->hostname);
+    if (host_info == NULL)
     {
         printf("Error: Failed to get host infomation\n");
-        return NULL;
+        host->ip_address = NULL;
+        return 0;
     }
 
     // NOTE: IPv4以外はエラー
-    if (host->h_length != 4)
+    if (host_info->h_length != 4)
     {
         printf("Error: Internet protocol is not IPv4");
-        return NULL;
+        host->ip_address = NULL;
+        return 0;
     }
 
     // NOTE: ホスト情報のアドレス群の一つ目をIPアドレスとする
-    return host->h_addr_list[0];
+    host->ip_address = host_info->h_addr_list[0];
+    return 0;
 }
 
 /**
  * URLからホスト名とパスを取得する
- * @param hostname ホスト名と格納するバッファへのアドレス
- * @param path パスを格納するバッファへのアドレス
- * @param URLが格納するバッファへのアドレス
+ * @param host ホスト情報が格納された構造体
+ * @param request リクエスト情報が格納された構造体
+ * @param URL
  * @return 0
  */
-int getHostnameAndPathAndPort(char *hostname, int *port, char *path, char *url)
+int getHostnameAndPath(Host *host, HttpRequest *request, char *url)
 {
     unsigned int i, j;
     char hostname_path[MAX_HOSTNAME_SIZE + MAX_PATH_SIZE];
@@ -67,7 +71,7 @@ int getHostnameAndPathAndPort(char *hostname, int *port, char *path, char *url)
     {
         strcpy(hostname_path, url);
     }
-    
+
     // NOTE: 最初の `/` までの文字数をカウント
     for (i = 0; i < strlen(hostname_path); i++)
     {
@@ -79,37 +83,51 @@ int getHostnameAndPathAndPort(char *hostname, int *port, char *path, char *url)
     // NOTE: `/` が hostname_path に含まれていなかった場合: hostname_path 全体を hostname, path を `/` とする
     if (i == strlen(hostname_path))
     {
-        strcpy(hostname, hostname_path);
-        strcpy(path, '/');
+        copyStringSafely(host->hostname, hostname_path, sizeof(host->hostname));
+        strcpy(request->target, (const char *)'/');
     }
     else
     {
         // NOTE: `/` が hostname_path に含まれていた場合: `/` の直前を hostname, `/` 以降を path とする
-        strncpy(hostname, hostname_path, i);
-        hostname[i] = '\0';
-        strcpy(path, &hostname_path[i]);
+        copyStringSafely(host->hostname, hostname_path, i + 1);
+        strcpy(request->target, &hostname_path[i]);
     }
+    return 0;
+}
 
+/**
+ * hostnameからポート番号を取得する
+ * @param host ホスト情報が格納された構造体
+ */
+void getPortNumber(Host *host)
+{
+    unsigned int j;
     // NOTE: 最初の `:` までの文字数をカウント
-    for (j = 0; j < strlen(hostname); j++)
+    for (j = 0; j < strlen(host->hostname); j++)
     {
-        if (hostname[j] == ':')
+        if (host->hostname[j] == ':')
         {
             break;
         }
     }
     // NOTE: `:` が hostname に含まれていた場合: `:` 以降を port とする
-    if (j != strlen(hostname))
+    if (j != strlen(host->hostname))
     {
         char portString[MAX_SIZE];
-        strcpy(portString, &hostname[j + 1]);
-        *port = atoi(portString);
-        hostname[j] = '\0';
+        copyStringSafely(portString, &host->hostname[j + 1], MAX_SIZE);
+        host->port = atoi(portString);
+        host->hostname[j] = '\0';
     }
     // NOTE: `:` が hostname に含まれていない場合、80 を port とする
     else
     {
-        *port = DEFAULT_PORT;
+        host->port = DEFAULT_PORT;
     }
-    return 0;
+}
+
+void parseURL(Host *host, HttpRequest *request, char *url)
+{
+    getHostnameAndPath(host, request, url);
+    getPortNumber(host);
+    getIpAddress(host);
 }

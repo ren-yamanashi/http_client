@@ -1,6 +1,7 @@
 #ifndef _CONSTANCE_H
 #define _CONSTANCE_H
 
+#define RECV_FLAG 0
 #define DEFAULT_PORT 80
 #define MAX_RESPONSE_SIZE (1024 * 1024 * 5)
 #define MAX_REQUEST_SIZE (1024)
@@ -8,5 +9,7 @@
 #define MAX_PATH_SIZE 1024
 #define MAX_SIZE 128
 #define MAX_URL 256
+#define ERROR_FLAG -1
+#define SUCCESS_FLAG 1
 
 #endif

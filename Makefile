@@ -3,7 +3,7 @@
 CC = gcc
 OUT_DIR = target
 OUT_FILE = a.out
-SOURCES = lib/client.c lib/parseURL.c
+SOURCES = lib/main.c lib/client.c lib/parseURL.c lib/request.c lib/helper.c lib/response.c
 
 default:
 	make clean 
@@ -20,4 +20,4 @@ clean:
 	rm -rf $(OUT_DIR)
 
 runClient: 
-	target/a.out http://localhost:8080/
+	target/a.out http://localhost:8080/user/2

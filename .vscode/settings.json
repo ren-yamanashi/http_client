@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "constance.h": "c",
+        "request.h": "c",
+        "helper.h": "c"
+    }
+}
