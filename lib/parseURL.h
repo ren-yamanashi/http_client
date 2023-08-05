@@ -4,7 +4,7 @@
 #include "constance.h"
 #include "struct.h"
 
-char *getIpAddress(char *hostname); 
+int *getIpAddress(Host *host);
 int getHostnameAndPath(Host *host, char *path, char *url);
 void getPortNumber(Host *host);
 #endif

@@ -12,6 +12,7 @@
 #include "request.h"
 #include "helper.h"
 #include "struct.h"
+#include "response.h"
 #include "client.h"
 
 /**
@@ -27,27 +28,6 @@ void showMessage(char *message, unsigned int size)
         putchar(message[i]);
     }
     printf("\r\n");
-}
-
-/**
- * レスポンスメッセージの受信
- * @param sock 接続済みのソケット
- * @param response_size レスポンスメッセージを格納するバッファのアドレス
- * @param buffer_size response_messageのバッファのサイズ
- * @return 受信したデータサイズ(バイト長)
- */
-int recvResponseMessage(int sock, char *response_message, unsigned int buffer_size)
-{
-    // NOTE: レスポンスを受信
-    int recv_size = recv(sock, response_message, buffer_size, RECV_FLAG);
-    if (isError(recv_size))
-    {
-        printf("Error: Failed to receive response message\n");
-        return ERROR_FLAG;
-    }
-    // NOTE: バッファの現在の終端をNULL文字で終了
-    response_message[recv_size] = '\0';
-    return recv_size;
 }
 
 /**
@@ -71,7 +51,7 @@ int httpClient(int sock, char *hostname, char *path)
         return ERROR_FLAG;
     }
 
-    // NOTE: レスポンスメッセージの表示
+    // NOTE: リクエストメッセージの表示
     printf("\n======Request message======\n\n");
     showMessage(request_message, request_size);
 
@@ -107,11 +87,10 @@ int httpClient(int sock, char *hostname, char *path)
 
 int main(int argc, char *argv[])
 {
-    int sock = -1;
-    struct sockaddr_in sock_addr_info;
+    int sock = ERROR_FLAG;
     char url[MAX_URL];
-    char *ip_address;
     char path[MAX_PATH_SIZE];
+    struct sockaddr_in sock_addr_info;
     Host host;
 
     if (argc == 2)
@@ -129,8 +108,8 @@ int main(int argc, char *argv[])
     getPortNumber(&host);
 
     // NOTE: ホスト名からIPアドレスを取得
-    ip_address = getIpAddress(host.hostname);
-    if (ip_address == NULL)
+    getIpAddress(&host);
+    if (host.ip_address == NULL)
     {
         printf("Error: failed get IP address\n");
         return ERROR_FLAG;
@@ -144,13 +123,13 @@ int main(int argc, char *argv[])
         return ERROR_FLAG;
     }
 
-    // NOTE: 構造体を全て０にセット
+    // NOTE: 構造体を全て0にセット
     memset(&sock_addr_info, 0, sizeof(struct sockaddr_in));
 
     // NOTE:サーバーのアドレスファミリー・ボート番号・IPアドレスの情報を設定
     sock_addr_info.sin_family = AF_INET;
     sock_addr_info.sin_port = htons((unsigned short)host.port);
-    memcpy(&(sock_addr_info.sin_addr.s_addr), ip_address, 4);
+    memcpy(&(sock_addr_info.sin_addr.s_addr), host.ip_address, 4);
 
     // NOTE: サーバーに接続
     if (isError(connect(sock, (struct sockaddr *)&sock_addr_info, sizeof(struct sockaddr_in))))

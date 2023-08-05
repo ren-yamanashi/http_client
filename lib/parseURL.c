@@ -13,42 +13,46 @@
 
 /**
  * ホスト名からIPアドレスを取得する
- * @param hostname ホスト名
- * @return IPアドレスが格納されたバッファへのアドレス(失敗時はNULL)
+ * @param host ホスト情報が格納された構造体
+ * @return 0
  */
-char *getIpAddress(char *hostname)
+int *getIpAddress(Host *host)
 {
-    struct hostent *host;
+    struct hostent *host_info;
 
     // NOTE: ホスト名がIPv4アドレスかチェック
-    if (inet_addr(hostname) != INADDR_NONE)
+    if (inet_addr(host->hostname) != INADDR_NONE)
     {
-        // NOTE: ホスト名が既にIPv4アドレスであれば、そのまま返す
-        return hostname;
+        // NOTE: ホスト名が既にIPv4アドレスであれば、ホスト名をIPアドレスとする
+        host->ip_address = host->hostname;
+        return 0;
     }
 
     // NOTE: ホスト名からホスト情報を取得
-    host = gethostbyname(hostname);
-    if (host == NULL)
+    host_info = gethostbyname(host->hostname);
+    if (host_info == NULL)
     {
         printf("Error: Failed to get host infomation\n");
-        return NULL;
+        host->ip_address = NULL;
+        return 0;
     }
 
     // NOTE: IPv4以外はエラー
-    if (host->h_length != 4)
+    if (host_info->h_length != 4)
     {
         printf("Error: Internet protocol is not IPv4");
-        return NULL;
+        host->ip_address = NULL;
+        return 0;
     }
 
     // NOTE: ホスト情報のアドレス群の一つ目をIPアドレスとする
-    return host->h_addr_list[0];
+    host->ip_address = host_info->h_addr_list[0];
+    return 0;
 }
 
 /**
  * URLからホスト名とパスを取得する
- * @param hostname ホスト名と格納するバッファへのアドレス
+ * @param host ホスト情報が格納された構造体
  * @param path パスを格納するバッファへのアドレス
  * @param URLが格納するバッファへのアドレス
  * @return 0
@@ -91,6 +95,10 @@ int getHostnameAndPath(Host *host, char *path, char *url)
     return 0;
 }
 
+/**
+ * hostnameからポート番号を取得する
+ * @param host ホスト情報が格納された構造体
+ */
 void getPortNumber(Host *host)
 {
     unsigned int j;
