@@ -23,8 +23,19 @@ void createRequest(
     char *body,
     char *content_type)
 {
+    char formatted_target[256];
+
+    // NOTE: targetの先頭が`/`になるようにフォーマットする
+    if (target[0] == '/')
+    {
+        copyStringSafely(formatted_target, target, sizeof(formatted_target));
+    }
+    else
+    {
+        snprintf(formatted_target, sizeof(formatted_target), "/%s", target);
+        formatted_target[sizeof(formatted_target) - 1] = '\0';
+    }
     copyStringSafely(request->method, method, sizeof(request->method));
-    // TODO: targetの先頭に`/`がない場合、`/`をつける
     copyStringSafely(request->target, target, sizeof(request->target));
     copyStringSafely(request->endpoint, endpoint, sizeof(request->endpoint));
     copyStringSafely(request->version, HTTP_VERSION, sizeof(request->version));
