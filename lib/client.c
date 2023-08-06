@@ -24,6 +24,7 @@ void createRequest(
     char *content_type)
 {
     copyStringSafely(request->method, method, sizeof(request->method));
+    // TODO: targetの先頭に`/`がない場合、`/`をつける
     copyStringSafely(request->target, target, sizeof(request->target));
     copyStringSafely(request->endpoint, endpoint, sizeof(request->endpoint));
     copyStringSafely(request->version, HTTP_VERSION, sizeof(request->version));
