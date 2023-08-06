@@ -60,13 +60,13 @@ int getHostnameAndPath(Host *host, HttpRequest *request)
     char hostname_path[MAX_HOSTNAME_SIZE + MAX_PATH_SIZE];
 
     // URLの最初が `http://` の場合は `http://` を取り除く
-    if (strncmp(request->endpoint, "http://", strlen("http://")) == 0)
+    if (strncmp(request->origin, "http://", strlen("http://")) == 0)
     {
-        sscanf(request->endpoint, "http://%s", hostname_path);
+        sscanf(request->origin, "http://%s", hostname_path);
     }
     else
     {
-        strcpy(hostname_path, request->endpoint);
+        strcpy(hostname_path, request->origin);
     }
 
     // NOTE: 最初の `/` までの文字数をカウント

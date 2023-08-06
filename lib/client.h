@@ -13,7 +13,7 @@ void createRequest(
     HttpRequest *request,
     char *method,
     char *target,
-    char *endpoint,
+    char *origin,
     char *body,
     char *content_type);
 
