@@ -15,8 +15,6 @@
  */
 int *getIpAddress(Host *host)
 {
-    struct hostent *host_info;
-
     // NOTE: ホスト名がIPv4アドレスかチェック
     if (inet_addr(host->hostname) != INADDR_NONE)
     {
@@ -26,7 +24,7 @@ int *getIpAddress(Host *host)
     }
 
     // NOTE: ホスト名からホスト情報を取得
-    host_info = gethostbyname(host->hostname);
+    struct hostent *host_info = gethostbyname(host->hostname);
     if (host_info == NULL)
     {
         printf("Error: Failed to get host infomation\n");

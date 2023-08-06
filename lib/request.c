@@ -54,7 +54,6 @@ int processRequest(int sock, Host *host, HttpRequest *request)
 {
     int request_size;
     char request_message[MAX_REQUEST_SIZE];
-    // TODO: リクエストメッセージの解析
 
     // NOTE: リクエストメッセージを作成
     request_size = createRequestMessage(request_message, host, request);
