@@ -19,7 +19,7 @@ void createRequest(
     HttpRequest *request,
     char *method,
     char *target,
-    char *endpoint,
+    char *origin,
     char *body,
     char *content_type)
 {
@@ -37,7 +37,7 @@ void createRequest(
     }
     copyStringSafely(request->method, method, sizeof(request->method));
     copyStringSafely(request->target, target, sizeof(request->target));
-    copyStringSafely(request->endpoint, endpoint, sizeof(request->endpoint));
+    copyStringSafely(request->origin, origin, sizeof(request->origin));
     copyStringSafely(request->version, HTTP_VERSION, sizeof(request->version));
     if (body != NULL && strlen(body) - 1 > 0)
     {

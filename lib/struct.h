@@ -16,7 +16,7 @@ typedef struct
     char version[32];
     char content_type[128];
     char body[1024];
-    char endpoint[1024];
+    char origin[1024];
     unsigned int content_length;
 } HttpRequest;
 
